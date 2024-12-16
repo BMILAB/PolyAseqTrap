@@ -56,7 +56,7 @@ devtools::install_local("your_path_of_PolyAseqTrap-master.zip", build_vignettes 
 Application examples
 =============
 We evaluated PolyAseqTrap against existing 3' sequencing pipelines using data from 16 different 3' sequencing techniques across multiple species. This comprehensive evaluation demonstrates the effectiveness and robustness of PolyAseqTrap. In this guide, we use demo data from three species—human, mouse, and Arabidopsis to illustrate how PolyAseqTrap can be applied for unified and user-friendly polyA site identification and analysis across different types of 3' sequencing data.
-The demo includes the following, please refer to the vignette ([PDF](https://github.com/APAexplorer/PolyAseqTrap/blob/main/vignettes/PolyAseqTrap_tutorial.pdf), [HTML](https://apaexplorer.github.io/PolyAseqTrap/vignettes/PolyAseqTrap_tutorial.html)) for full details.
+The demo includes the following, please refer to the vignette ([PDF](https://github.com/BMILAB/PolyAseqTrap/blob/main/doc/PolyAseqTrap_tutorial.pdf), [HTML](https://apaexplorer.github.io/PolyAseqTrap/vignettes/PolyAseqTrap_tutorial.html)) for full details.
 * **Preparations**
 * **Identify PACs at varying confidence levels from BAM file**
 
