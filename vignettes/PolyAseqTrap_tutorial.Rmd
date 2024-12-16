@@ -1,0 +1,668 @@
+---
+title: "Identification and quantification of polyA sites from different 3'end seq data with the PolyAseqTrap package"
+author: "Wenbin Ye, Xin Cheng, Xiaohui Wu"
+date: "2024-12-12"
+output:
+  rmarkdown::pdf_document:
+    latex_engine: xelatex
+    toc:  true
+    toc_depth: 6
+    number_sections: true
+    fig_width: 5
+    fig_height: 4
+  rmarkdown::html_document: 
+    toc: yes    
+vignette: >
+  %\VignetteIndexEntry{PolyAseqTrap_tutorial}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+always_allow_html: true  
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.height = 5.5,
+  collapse = TRUE,
+  warning = FALSE,
+  comment = "#>"
+)
+```
+
+
+# Overview
+We evaluated PolyAseqTrap against existing 3' sequencing pipelines using data from 16 different 3' sequencing techniques across multiple species. This comprehensive evaluation demonstrates the effectiveness and robustness of PolyAseqTrap. In this guide, we use demo data from three species—human, mouse, and Arabidopsis to illustrate how PolyAseqTrap can be applied for unified and user-friendly polyA site identification and analysis across different types of 3' sequencing data.
+
+# Preparations
+## Preprocessing of 3'seq dataset
+The 3'seq FASTQ data can be obtained from the [NCBI SRA](https://www.ncbi.nlm.nih.gov/sra/) database. Before analysis, it is important to preprocess the data using tools such as [Cutadapt](https://cutadapt.readthedocs.io/en/stable/) and [UMI-tools](https://umi-tools.readthedocs.io/en/latest/QUICK_START.html) to trim adapter sequences and handle unique molecular identifiers (UMIs). These preprocessing steps are essential to ensure the accuracy and quality of the data before downstream analysis with PolyAseqTrap. 
+
+Additionally, we used regular expressions with fuzzy matching to identify the polyA stretches at the 3'end or polyT stretches at the 5'end of reads, collectively referred to as potential polyA tails.This polyA tail information was recorded in the sequence header of the FASTQ file, and the polyA tails in the reads were subsequently trimmed. 
+
+**Note** that we used only a subset of the original data as demo data. Please download the full dataset from NCBI SRA (e.g. [SRR1168402](https://www.ncbi.nlm.nih.gov/sra/?term=SRR1168402) and [SRR11837378](https://www.ncbi.nlm.nih.gov/sra/?term=SRR11837378))
+
+<span style="color: blue;"> **Method 1: using R scrip to identify and trim the polyT/polyA stretches** </span>
+
+```{r  message=FALSE, results='hide'}
+library(PolyAseqTrap)
+## identify and trim the polyT stretches
+file_T <- system.file("extdata", "SRR1168402_T.fastq", package = "PolyAseqTrap")
+# The output is 'SRR11837378_A.A.fq', which can be used as input for alignment tools
+findTailAT(infile=file_T, odir=NULL,
+         poly='T', ml=20, mp=5, mg=10, mm=2, deep=FALSE,
+         mtail=6, mper=0.75, mr=3, review=TRUE, debug=TRUE,
+          bar=0, reg=1, suf=NULL)
+
+
+## identify and trim the polyA stretches
+file_A <- system.file("extdata", "SRR11837378_A.fastq", package = "PolyAseqTrap")
+# The output is 'SRR11837378_A.A.fq', which can be used as input for alignment tools
+findTailAT(infile=file_A, odir=NULL, poly='A', 
+          ml=20, mp=5, mg=10, mm=2, 
+          deep=0, mtail=6, mper=0.75, 
+          mr=3, review=TRUE, debug=TRUE, bar=0, reg=1, suf=NULL)
+# Example of sequence headers in the FASTQ file
+##@SRR1168402.78_TTTCTTTTTTTTTTTT
+##@SRR11837378.19_TAACAAATT_AAAAAAAAAAAAA
+```
+
+<span style="color: blue;"> **Method 2: using Perl script to identify and  trim the polyT/polyA stretches** </span>
+Given the potentially large size of the data, R may face performance limitations with large datasets. To mitigate this, we also provide corresponding Perl scripts as an alternative for faster data processing, especially for users working with large-scale datasets.
+
+```bash
+## Usage
+#cd path_of_PolyAseqTra
+perl ./PolyAseqTrap/scripts/MAP_findTailAT.pl -h
+
+## identify and trim the polyA stretches
+perl ./PolyAseqTrap/scripts/MAP_findTailAT.pl \
+ -in  ./PolyAseqTrap/inst/extdata/SRR1168402_T.fastq \
+  -poly T -ml 20 -mp 5 -mg 10 -mm 2 -mr 3 \
+  -mper 0.75 -mtail 6 -deep F -reg 1 \
+  -odir ./ -suf ""  -oraw F  -debug T -review T
+
+## identify and trim the polyA stretches
+perl ./PolyAseqTrap/scripts/MAP_findTailAT.pl \
+ -in  ./PolyAseqTrap/inst/extdata/SRR11837378_A.fastq \
+ -poly A -ml 20 -mp 5 -mg 10 -mm 2 -mr 3 \
+ -mper 0.75 -mtail 6 -deep F -reg 1 \
+ -odir ./ -suf ""  -oraw F  -debug T -review T
+
+```
+
+Then use alignment tool such as [STAR](https://github.com/alexdobin/STAR) to perform local alignment with soft-clipping allowed.
+
+```bash
+STAR --runThreadN ${cpu} --genomeDir ${REFindex}  \
+--outFileNamePrefix  ${outpath}/sampleName \
+--readFilesIn   ${input}  \
+--outSAMtype BAM SortedByCoordinate \
+--outFilterMultimapNmax 1 \
+--outMultimapperOrder Random 
+```
+
+## Reference genome
+In mapping process of alignment tool (e.g., [STAR](https://github.com/alexdobin/STAR)), the reference genomes and annotation files can be obtained from [Ensembl](https://www.ensembl.org), [UCSC](https://genome.ucsc.edu/) and [NCBI](https://www.ncbi.nlm.nih.gov/datasets/genome/) database. For polyA site identification in PolyAseqTrap, the reference genome format [BSgenome](https://bioconductor.org/packages/release/bioc/html/BSgenome.html) is required for detecting A-rich polyA sites and removing internal priming. The BSgenome of ***Arabidopsis thaliana (TAIR10)*** for this example can be downloaded from the PolyAseqTrap GitHub repository. If there is no corresponding BSgenome package for your species, please refer to the [BSgenome package](https://github.com/mevers/build_custom_BSgenome_TxDb) for instructions on creating a custom BSgenome object.
+
+* <span style="color: blue;"> **Human genome (hg39)** </span>
+```{r message=FALSE}
+# for Homo sapiens (UCSC genome hg38)
+library("BSgenome.Hsapiens.UCSC.hg38", quietly = TRUE)
+bsgenome <-BSgenome.Hsapiens.UCSC.hg38
+```
+
+* <span style="color: blue;"> **Mouse genome (mm39)** </span>
+```{r message=FALSE}
+# for Mus musculus (UCSC genome mm39)
+library("BSgenome.Mmusculus.UCSC.mm39", quietly = TRUE)
+bsgenome <-  BSgenome.Mmusculus.UCSC.mm39
+```
+
+* <span style="color: blue;"> **Arabidopsis genome (TAIR10)** </span>
+```{r message=FALSE}
+# for Arabidopsis thaliana (Ensembl TAIR110)
+library("BSgenome.Athaliana.ENSEMBL.TAIR10", quietly = TRUE)
+bsgenome <- BSgenome.Athaliana.ENSEMBL.TAIR10
+```
+
+
+## Genome annotation and 3'UTR region extraction
+Genome annotation stored in a GFF/GTF file or a TXDB R object can be used  to annotate PACs. The `parseGff` or `parseGenomeAnnotation` function from `movAPA` is employed to parse the provided annotation, and the processed annotation can then be saved as an Rdata object for future use. For more details, please refer to [movAPA](https://github.com/BMILAB/movAPA). 
+
+```{r message=FALSE,eval=FALSE}
+install.packages("devtools")
+require(devtools)
+install_github("BMILAB/movAPA")
+library(movAPA)
+browseVignettes('movAPA')
+```
+
+It is worth noting that 3'UTR annotations can be particularly useful for identifying V8 polyA sites in PolyAseqTrap, especially for 3'seq data lacking polyA tail information. The GRanges object of the 3'UTR annotations used in this study can be downloaded from the PolyAseqTrap GitHub repository, including human (hg39), mouse (mm39), and Arabidopsis (TAIR10). 
+
+* <span style="color: blue;"> **for human (hg39)**</span>
+```{r bsgenome_hg, message=FALSE,eval=FALSE}
+library(movAPA)
+# for Homo sapiens
+# download Homo sapiens (hg38) from Ensembl
+athGFF <- "Homo_sapiens.GRCh38.110.gtf"
+gff<- parseGff(athGFF)
+saveRDS(gff,file="Ensembl_Homo_sapiens.GRCh38.110.Rdata")
+
+threeUTR.data <-subset(gff$anno.need,type=="three_prime_UTR")
+threeUTRregion <- makeGRangesFromDataFrame(threeUTR.data,keep.extra.columns = F)
+saveRDS(threeUTRregion,file="ThreeRegion_Homo_sapiens.Rdata")
+```
+
+* <span style="color: blue;"> **for mouse (mm39)**</span>
+```{r bsgenome_mouse, message=FALSE,eval=FALSE}
+library(movAPA)
+# for Mus musculus
+# download Mus musculus (mm39) from Ensembl
+athGFF <- "Mus_musculus.GRCm39.110.gtf"
+gff<- parseGff(athGFF)
+saveRDS(gff,file="Ensembl_Mus_musculus.GRCm39.110.Rdata")
+threeUTR.data <-subset(gff$anno.need,type=="three_prime_UTR")
+threeUTRregion <- makeGRangesFromDataFrame(threeUTR.data,keep.extra.columns = F)
+save
+```
+
+* <span style="color: blue;"> **for Arabidopsis (TAIR10)**</span>
+```{r bsgenome_tair, message=FALSE,eval=FALSE}
+library(movAPA)
+# for Arabidopsis thaliana
+# download Arabidopsis (TAIR10) from Ensembl Plant
+athGFF <- "Arabidopsis_thaliana.TAIR10.57.gff3"
+gff<- parseGff(athGFF)
+saveRDS(gff,file="Ensembl_Arabidopsis_thaliana.TAIR10.57.Rdata")
+threeUTRregion <- makeGRangesFromDataFrame(threeUTR.data,keep.extra.columns = F)
+saveRDS(threeUTRregion,file="ThreeRegion_Arabidopsis_thaliana.Rdata")
+```
+
+
+# Identify PACs at varying confidence levels from BAM file
+PolyAseqTrap employs a priority model to classify aligned reads into three categories based on the presence and composition of the polyA tail: 
+
+ * reads with perfectly matched polyA tails (**C1**).
+ 
+ * reads with partially matched polyA tails (**C2**).
+ 
+ * reads without polyA tails but enriched at the 3'end (**C3**).  
+
+Additionally, each category is further subdivided into subclasses (**V1** to **V8**) by considering factors such as polyA tail length, base composition, and alignment results. If an aligned read cannot reliably pinpoint a polyA site, it is labeled as `count`. The `use.as.count` column is set to 1 if aligned reads are within 24 nt (default) of identified PACs, indicating that these reads can be used to quantify PACs.
+
+## Identify PACs in human genome
+Here we demonstrate how to use PolyAseqTrap to identify and quantify polyA sites using two different 3'seq datasets from the human genome: PolyA-Seq ([SRR299116](https://www.ncbi.nlm.nih.gov/sra/?term=SRR299116), polyT stretches) and PAS-seq ([SRR11837378](https://www.ncbi.nlm.nih.gov/sra/?term=SRR11837378), polyA stretches). For simplicity, we focus on chromosome 22 in this example. The corresponding BAM files are available in the PolyAseqTrap GitHub repository.
+The demonstration human PACs results can be loaded with `data(PACs_human)`. 
+
+**Note**: here the `adjust.chr` parameter in the `FindPTA` function is set to `TRUE` to add the "chr" prefix to chromosome names in the BAM file, as the reference genome used for alignment from the Ensembl does not include the "chr" prefix.
+
+
+<span style="color: blue;"> **Example 1: Identify and quantify polyA sites in 3'end data with polyT stretches** </span>
+```{r message=FALSE, warning=FALSE}
+library(PolyAseqTrap,  warn.conflicts = FALSE, quietly=TRUE)
+library(BSgenome.Hsapiens.UCSC.hg38)
+bsgenome <-  BSgenome.Hsapiens.UCSC.hg38
+
+# load 3'UTR annotation for detecting V8 polyA site
+threeUTR_path <- system.file("extdata",
+                             "ThreeRegion_Homo_sapiens.Rdata",
+                             package = "PolyAseqTrap")
+threeUTRregion <- readRDS(threeUTR_path)
+
+# get bam file
+bam_T_file <- system.file("extdata",
+                          "SRR299116_T_chr22_hg_sorted.bam",
+                          package = "PolyAseqTrap")
+
+
+# identify and quantify PACs, it wouldn't predict V8 polyA site if 
+# without providing 3'UTR annotation.
+# here "adjust.chr" is set to TRUE to add "chr" prefix
+pa.hg.result <- FindPTA(bam=bam_T_file, 
+        yieldSize=10^7,
+        reverse=F,
+        bsgenome=bsgenome,
+        d=24,
+        poly='T',
+        adjust.chr=TRUE,
+        threeUTRregion=threeUTRregion,
+        cutoffCount = 5,
+        ext3UTRlen =   1000 ,
+        isDRS = FALSE,
+        run.quantify=TRUE)
+# Display details of alignment and category of aligned reads
+rmarkdown::paged_table(head(pa.hg.result$pa.table[,c("readName","cigar","seq",
+                                                     "softClipFragment","trimmed_seq",
+                                                     "unmapped_seq",
+                                                     "reference_seq","is_Arich",
+                                                     "chr","strand","coord",
+                                                     "level","class","use.as.count")]),
+                       options = list(rows.print = 5, cols.print = 5))
+#category of aligned reads
+t(table(pa.hg.result$pa.table$class))
+#subclasses of aligned reads
+t(table(pa.hg.result$pa.table$level))
+
+# Display details of PACs
+rmarkdown::paged_table(head(pa.hg.result$pa.coord),
+                       options = list(rows.print = 5, cols.print = 5)) 
+#filter PACs that were supported by at least five reads
+pac5.hg <- subset(pa.hg.result$pa.coord,total.count>=5)
+```
+
+
+
+<span style="color: blue;"> **Example 2: Identifying and quantifying polyA sites in 3'seq data with polyA stretches** </span>
+
+```{r message=FALSE, eval=FALSE}
+library(PolyAseqTrap, warn.conflicts = FALSE, quietly=TRUE)
+library(BSgenome.Hsapiens.UCSC.hg38)
+bsgenome <-  BSgenome.Hsapiens.UCSC.hg38
+
+# load 3'UTR annotation for detecting V8 polyA site
+threeUTR_path <- system.file("extdata",
+                             "ThreeRegion_Homo_sapiens.Rdata",
+                             package = "PolyAseqTrap")
+threeUTRregion <- readRDS(threeUTR_path)
+
+# get bam file
+bam_A_file <- system.file("extdata",
+                          "SRR11837378_A_chr22_hg_sorted.bam", 
+                          package = "PolyAseqTrap")
+
+# identify and quantify PACs, it wouldn't predict V8 polyA site if 
+#without providing 3'UTR annotation.
+pa.hg.result <- FindPTA(bam=bam_A_file, 
+                        yieldSize=10^7,
+                        reverse=F,
+                        bsgenome=bsgenome,
+                        d=24,
+                        poly='A',
+                        adjust.chr=TRUE,
+                        threeUTRregion=threeUTRregion,
+                        cutoffCount = 5,
+                        ext3UTRlen =   1000 ,
+                        isDRS = FALSE,
+                        run.quantify=TRUE)
+# Display details of alignment and category of aligned reads
+rmarkdown::paged_table(head(pa.hg.result$pa.table[,c("readName","cigar","seq",
+                                                     "softClipFragment","trimmed_seq",
+                                                     "unmapped_seq",
+                                                     "reference_seq","is_Arich",
+                                                     "chr","strand","coord",
+                                                     "level","class","use.as.count")]),
+                       options = list(rows.print = 5, cols.print = 5))
+#category of aligned reads
+knitr::kable(t(table(pa.hg.result$pa.table$class)))
+#subclasses of aligned reads
+knitr::kable(t(table(pa.hg.result$pa.table$level)))
+
+# Display details of PACs
+rmarkdown::paged_table(head(pa.hg.result$pa.coord),
+                       options = list(rows.print = 5, cols.print = 5)) 
+#filter PACs that were supported by at least five reads
+pac5.hg <- subset(pa.hg.result$pa.coord,total.count>=5)
+```
+
+## Identify PACs in mouse genome 
+Here we use 3P-Seq data ( [SRR766743](https://www.ncbi.nlm.nih.gov/sra/?term=SRR766743), polyT stretches) to demonstrate how to use PolyAseqTrap to identify and quantify polyA sites in mouse genome. For simplicity, we focus on chromosome 19 in this example. The corresponding BAM files are available in the PolyAseqTrap GitHub repository. The demonstration mouse PACs results can be loaded with `data(PACs_mouse)`.
+
+**Note**: here the `adjust.chr` parameter in the `FindPTA` function is set to `TRUE` to add the "chr" prefix to chromosome names in the BAM file, as the reference genome used for alignment from the Ensembl does not include the "chr" prefix.
+
+```{r message=FALSE, warning=FALSE}
+library(PolyAseqTrap,  warn.conflicts = FALSE, quietly=TRUE)
+library(BSgenome.Mmusculus.UCSC.mm39)
+bsgenome <-  BSgenome.Mmusculus.UCSC.mm39
+# load 3'UTR annotation for detecting V8 polyA site
+threeUTR_path <- system.file("extdata",
+                             "ThreeRegion_Mus_musculus.Rdata", 
+                             package = "PolyAseqTrap")
+threeUTRregion <- readRDS(threeUTR_path)
+
+# get bam file
+bam_T_file <- system.file("extdata", 
+                          "SRR766743_T_chr19_mm_sorted.bam", 
+                          package = "PolyAseqTrap")
+# identify and quantify PACs, it wouldn't predict V8 polyA site if 
+#without providing 3'UTR annotation
+pa.mm.result <- FindPTA(bam=bam_T_file, 
+                        yieldSize=10^7,
+                        reverse=F,
+                        bsgenome=bsgenome,
+                        d=24,
+                        poly='T',
+                        adjust.chr=TRUE,
+                        threeUTRregion=threeUTRregion,
+                        cutoffCount = 5,
+                        ext3UTRlen =   1000 ,
+                        isDRS = FALSE,
+                        run.quantify=TRUE)
+
+
+# Display details of alignment and category of aligned reads
+rmarkdown::paged_table(head(pa.mm.result$pa.table[,c("readName","cigar","seq",
+                                                     "softClipFragment","trimmed_seq",
+                                                     "unmapped_seq",
+                                                     "reference_seq","is_Arich",
+                                                     "chr","strand","coord",
+                                                     "level","class","use.as.count")]),
+                       options = list(rows.print = 5, cols.print = 5))
+#category of aligned reads
+t(table(pa.mm.result$pa.table$class))
+#subclasses of aligned reads
+t(table(pa.mm.result$pa.table$level))
+
+# Display details of PACs
+rmarkdown::paged_table(head(pa.mm.result$pa.coord),
+                       options = list(rows.print = 5, cols.print = 5)) 
+#filter PACs that were supported by at least five reads
+pac5.mm <- subset(pa.mm.result$pa.coord,total.count>=5)
+```
+
+
+## Identify PACs in Arabidopsis genome
+Here we use PolyA-Tag-seq data ( [SRR5055884](https://www.ncbi.nlm.nih.gov/sra/?term=SRR5055884), polyT stretches) to demonstrate how to use PolyAseqTrap to identify and quantify polyA sites in Arabidopsis genome. For simplicity, we focus on chromosome 2 in this example. The corresponding BAM files are available in the PolyAseqTrap GitHub repository. The demonstration Arabidopsis PACs results can be loaded with `data(PACs_tair)`.
+
+```{r message=FALSE, warning=FALSE}
+library(PolyAseqTrap, warn.conflicts = FALSE, quietly=TRUE)
+library(BSgenome.Athaliana.ENSEMBL.TAIR10)
+bsgenome <-  BSgenome.Athaliana.ENSEMBL.TAIR10
+
+# load 3'UTR annotation for detecting V8 polyA site
+threeUTR_path <- system.file("extdata", 
+                             "ThreeRegion_Arabidopsis_thaliana.Rdata", 
+                             package = "PolyAseqTrap")
+threeUTRregion <- readRDS(threeUTR_path)
+
+# get bam file
+bam_T_file <- system.file("extdata", 
+                          "SRR5055884_T_ch2_tair_sorted.bam", 
+                          package = "PolyAseqTrap")
+# identify and quantify PACs, it wouldn't predict V8 polyA site if 
+# without providing 3'UTR annotation
+pa.tair.result <- FindPTA(bam=bam_T_file, 
+                          yieldSize=10^7,
+                          reverse=F,
+                          bsgenome=bsgenome,
+                          d=24,
+                          poly='T',
+                          adjust.chr=FALSE,
+                          threeUTRregion=threeUTRregion,
+                          cutoffCount = 5,
+                          ext3UTRlen =   1000 ,
+                          isDRS = FALSE,
+                          run.quantify=TRUE)
+
+# Display details of alignment and category of aligned reads
+rmarkdown::paged_table(head(pa.tair.result$pa.table[,c("readName","cigar","seq",
+                                                       "softClipFragment","trimmed_seq",
+                                                       "unmapped_seq",
+                                                       "reference_seq","is_Arich",
+                                                       "chr","strand","coord",
+                                                       "level","class","use.as.count")]),
+                       options = list(rows.print = 5, cols.print = 5))
+#category of aligned reads
+t(table(pa.tair.result$pa.table$class))
+#subclasses of aligned reads
+t(table(pa.tair.result$pa.table$level))
+
+# Display details of PACs
+rmarkdown::paged_table(head(pa.tair.result$pa.coord),
+                       options = list(rows.print = 5, cols.print = 5)) 
+#filter PACs that were supported by at least five reads
+pac5.tair<- subset(pa.tair.result$pa.coord,total.count>=5)
+```
+
+# Remove internal priming artifacts
+Inspired by the **DeepPASTA** model ([Arefeen, et al., 2019](#1)) that predicts polyA sites from DNA sequences, we designed a deep learning model called DeepIP to predict internal priming artifacts from A-rich polyA sites. DeepIP utilizes both convolutional neural network (CNN) and recurrent neural network (RNN). CNN extracts features from sequences, and RNN is used to combine the extracted feature effects for predicting internal priming artifacts.The corresponding DeepIP scripts are available in the PolyAseqTrap GitHub repository.
+
+## Install DeepIP
+DeepIP can run on both Linux, and Windows, systems. To install and use DeepIP, you need to have [Conda](https://anaconda.org/anaconda/conda) installed on your machine. Please follow the steps below to set up DeepIP:
+
+
+* <span style="color: blue;"> **Prerequisites** </span>
+
+Ensure that **Conda** is installed on your system. If not, you can download and install Miniconda or Anaconda from the following links:
+
+   * [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+  
+   * [Anaconda](https://docs.anaconda.com/anaconda/install/)
+
+
+* <span style="color: blue;"> **Install DeepIP** </span>
+
+Once Conda is installed, you can create a new Conda environment and install DeepIP by running the following commands in your terminal (Linux) or command prompt (Windows):
+
+```bash
+# Create a new conda environment
+conda create -n DeepIP python=3.7
+conda env list 
+# Activate the environment
+conda activate DeepIP 
+# Install additional dependencies
+pip install keras
+pip install tensorflow
+pip install pandas
+pip install sklearn 
+pip install scikit-klearn 
+
+```
+
+## Build the training model (optional)
+Currently, we provide pre-trained models for human, mouse, and Arabidopsis species. If you would like to build a model for your own species, you can follow the steps below.
+
+* <span style="color: blue;"> **Prepare training data** </span>
+
+For model training, you need to prepare your training data. The training sequences should consist of the 100bp sequences upstream and downstream of the polyA site. 
+
+* <span style="color: blue;"> **Build a training model** </span>
+
+For our pre-trained models for human, mouse, and Arabidopsis, the positive data of the model are A-rich sequences with polyA sites and the negative data are A-rich sequences without polyA sites. 
+
+```bash
+python DeepIP_train.py \
+  -trainSeq train_mini.fa \
+  -trainedModel train_mini.fa.model.hdf5 \
+  -epoch 10
+```
+Where:
+
+ *  `trainSeq`: is the input training data (a FASTA file containing 200 bp geneome sequences).
+ 
+ *  `trainedModel`: is the name of the output model (this will be saved as an HDF5 file).
+ 
+ * `epoch`: the number of training iterations (default is 100). You can set a different number based on your training needs.
+ 
+Alternatively, you can run it in R.
+
+```{r message=FALSE, eval=FALSE}
+library(reticulate)
+use_condaenv("/path/miniconda3/envs/DeepIP/")
+# Build your own model
+py_run_string("trainSeq='train_mini.fa';
+              trainedModel='train_mini.model.hdf5'; 
+              epoch=10; seqLabel='01'")
+py_run_file('DeepIP_train.py')
+
+```
+ 
+## Test the model
+Once your model is trained or if you are using a pre-trained model, you can proceed to test it on new sequences. The model accepts a 200 nt genomic sequence as input and predicts whether the middle position of the input sequence corresponds to an internal priming site. Here's how to perform the testing:
+
+```bash
+python DeepIP_test.py \
+ -testSeq test_mini.fa \
+ -trainedModel train_mini.fa.model.hdf5 \
+ -outputFile test_result.csv
+```
+
+Alternatively, you can run it in R.
+```{r message=FALSE, eval=FALSE}
+library(reticulate) 
+use_condaenv("/path/miniconda3/envs/DeepIP/")
+# to identify whether PACs are internal priming artifacts
+py_run_string("testSeq='test_mini.fa'; 
+              trainedModel='train.mini.model.hdf5';
+              outputFile='train.mini.predicted.csv'; 
+              seqLabel='0/1'")
+py_run_file('DeepIP_test.py')
+```
+
+## Remove internal priming and regroup nearby cleavage sites
+3’seq techniques based on oligo(dT), such as PAC-seq, PAS-seq, polyA-seq, and WTTS-seq, are prone to internal priming artifacts, which can lead to inaccurate identification of PACs. To mitigate this issue, `PolyAseqTrap` integrates a deep learning-based model, `DeepIP`, to accurately identify whether A-rich PACs are internal priming artifacts. To utilize `DeepIP`, first extract the 100 bp upstream and downstream sequences of A-rich polyA sites from the PACs results generated by the `FindPTA` function. These sequences are then classified by `DeepIP` to identify potential internal priming artifacts.
+
+* <span style="color: blue;">**Extract a sequence of 200 nt surrounding A-rich polyA sites**</span> 
+```{r message=FALSE, eval=FALSE}
+library(PolyAseqTrap, warn.conflicts = FALSE, quietly=TRUE)
+library("BSgenome.Hsapiens.UCSC.hg38", quietly = TRUE)
+bsgenome <-BSgenome.Hsapiens.UCSC.hg38
+## load identified PACs in human genome generated by FindPTA function
+data(PACs_human)
+
+## extract 200 bp genome sequences surrounding A-rich polyA sites
+generateFASTA(reads=PACs_human$pa.table,
+              bsgenome=bsgenome,
+              output.name="human_Arich_PACs.fasta")
+```
+
+* <span style="color: blue;">**Use DeepIP to classify A-rich polyA sites**</span> 
+```{r message=FALSE, eval=FALSE}
+## use DeepIP to classify A-rich polyA sites
+library(reticulate) 
+use_condaenv("/path/miniconda3/envs/DeepIP/")
+py_run_string("testSeq='human_Arich_PACs.fasta';
+              trainedModel='human.train.model.hdf5'; 
+              outputFile='DeepIP_result_hg.csv'")
+py_run_file("DeepIP_test.py")
+
+# Alternatively, run the following Python command outside R:
+# python DeepIP_test.py -testSeq human_Arich_PACs.fasta  -trainedModel human.train.model.hdf5 -outputFile DeepIP_result_hg.csv
+```
+
+* <span style="color: blue;">**Remove internal priming artifacts and regroup nearby cleavage sites**</span> 
+```{r message=FALSE, eval=FALSE}
+### remove internal priming artifacts
+ip.table <- read.csv("DeepIP_result_hg.csv")
+head(ip.table)
+#title                score     true_label predict_label res
+#>chr22_19354941_-_0 0.4143335          0             0  TN
+#>chr22_19382772_-_0 0.4143623          0             0  TN
+#>chr22_19849373_-_0 0.4143335          0             0  TN
+
+## extract and remove internal priming artifacts
+ip.table <- subset(  ip.table,predict_label==0)
+ip.table$title <- gsub("^>","",  ip.table$title)
+PACs_human$pa.table$label <- paste0(
+  PACs_human$pa.table$chr,"_",
+  PACs_human$pa.table$coord,"_",
+  PACs_human$pa.table$strand,"_0")
+PACs_human$pa.table$level <- as.character(PACs_human$pa.table$level)
+index <- which(PACs_human$pa.table$label %in% ip.table$title)
+
+# remove internal priming artifacts
+PACs_human$pa.table$level[index] <- "Count"
+PACs_human$pa.table$level <- factor( PACs_human$pa.table$level,
+                                     levels=c("V1","V2","V3","V4","V5","V6","V7","V8","Count"))
+                              
+                                
+## regroup nearby cleavage sites
+PACs_human <- resut.PA(aln.result=PACs_human$pa.table,d=24)
+``` 
+
+**Note:** When running the analysis for other species, ensure that both the `bsgenome` object and the corresponding `training model` are updated to reflect the appropriate species. For example, for mouse, use `BSgenome.Mmusculus.UCSC.mm10` as the `bsgenome` object and `mouse.train.model.hdf5` as the training model. However, if a species-specific model is not available, the human model (`human.train.model.hdf5`) can still be used and should provide reliable results.
+
+# Mitigating Microheterogeneity in PACs
+Eukaryotic cleavage and polyadenylation processes exhibit considerable microheterogeneity, with plants showing higher variability than animals ([Ye, et al., 2021](#1)). Traditional methods often struggle to accurately identify distinct PACs due to overlapping regions. To address this, PolyAseqTrap integrates a density peak clustering algorithm, inspired by the [QuantifyPoly(A)](https://sourceforge.net/projects/quantifypoly-a/) method, to mitigate microheterogeneity and improve the accuracy of PAC identification. 
+
+Here, we demonstrate this approach using Arabidopsis as an example, showcasing how it refines PAC determination and reduces the impact of microheterogeneity in plant species. 
+```{r message=FALSE}
+library(PolyAseqTrap, warn.conflicts = FALSE, quietly=TRUE)
+## load identified PACs in Arabidopsis genome generated by FindPTA function
+data("PACs_tair")
+
+#filter PACs that were supported by at least five reads
+PACs_tair$pa.coord <- subset(PACs_tair$pa.coord,total.count>=5)
+
+# reduce the impact of microheterogeneity
+PACs_tair <-split_pac(pa.data=PACs_tair,d=24,mc.cores=1)
+
+#filter refined PACs that were supported by at least five reads
+PACs_tair$split.clusters<- subset(PACs_tair$split.clusters,total.count>=5)
+
+
+## compare and visualize the difference before and after reducing microheterogeneity
+library(dplyr)
+library(ggplot2)
+width.density<- data.frame(pac.width=c(PACs_tair$pa.coord$width,
+                                       PACs_tair$split.clusters$width) ,
+                           type=rep(c("before-cluster","after-cluster"),
+                                    time=c(length(PACs_tair$pa.coord$width),length(PACs_tair$split.clusters$width)))
+)
+width.density %>% dplyr::group_by(type) %>% dplyr::summarise(mean=mean(pac.width),median=median(pac.width ))
+
+# density plot
+mu <- plyr::ddply(width.density, "type", summarise, grp.mean=mean(pac.width))
+ggplot(width.density, aes(x=pac.width,color=type,fill=type)) + 
+  geom_density(alpha=0.6)+
+  geom_vline(data=mu, aes(xintercept=grp.mean, color=type),
+             linetype="dashed")+theme_bw()+
+  scale_fill_brewer(palette="Dark2")+
+  scale_color_brewer(palette="Dark2")+xlim(0,300)+
+  labs(x="Width of PACs (nt)",y="Density")+
+  guides(fill = guide_legend(title="Category"),color="none")+
+  theme(legend.position = c(0.7,0.7))
+```
+
+
+# Annotate PACs
+
+movAPA is a powerful R package developed by our team for modeling and visualizing the dynamics of PACs usage across biological samples. It provides comprehensive tools for preprocessing, annotating, and analyzing polyA sites, identifying polyA signals, profiling alternative polyadenylation (APA) dynamics, and generating visualizations. Here we briefly demonstrate how to seamlessly integrate `PolyAseqTrap` with `movAPA` for annotating the PACs identified by `PolyAseqTrap`. For detailed usage instructions and additional functionalities, please refer to the official [movAPA](https://github.com/BMILAB/movAPA) documentation.
+
+```{r annotate_PAC, message=FALSE,eval=FALSE}
+library(PolyAseqTrap, warn.conflicts = FALSE, quietly=TRUE)
+library("BSgenome.Hsapiens.UCSC.hg38", quietly = TRUE)
+library(movAPA, warn.conflicts = FALSE, quietly=TRUE)
+bsgenome <-BSgenome.Hsapiens.UCSC.hg38
+
+athGFF <- "Homo_sapiens.GRCh38.110.gtf"
+annotation <- parseGff(athGFF)
+
+# load identified PACs in human genome using FindPTA function
+data(PACs_human)
+colnames(PACs_human$pa.coord)[1:3] <- c("chr","UPA_start","UPA_end")
+data.PACds <- readPACds(PACs_human$pa.coord, colDataFile=NULL)
+# annotate PAC
+data.PACds <- annotatePAC(data.PACds, aGFF = annotation)
+# extend 3'UTR region 
+data.PACds <- ext3UTRPACds(data.PACds,ext3UTRlen = 1000)
+# identify polyA signals
+data.PACds<- annotateByPAS(data.PACds, bsgenome, grams='AATAAA', from=-50, to=25, label=NULL)
+data.PACds <- annotateByPAS(data.PACds, bsgenome, grams='V1', from=-50, to=25, label=NULL)
+data.PACds@anno$pA.signal <- "Others"
+data.PACds@anno$pA.signal[which(!is.na(data.PACds@anno$V1_dist))] <- "1Variants"
+data.PACds@anno$pA.signal[which(!is.na(data.PACds@anno$AATAAA_dist))] <- "AATAAA"
+
+table(data.PACds@anno$pA.signal)
+#1Variants    AATAAA    Others 
+#1346       721       126 
+
+table(data.PACds@anno$ftr)
+#3UTR       5UTR       exon intergenic     intron 
+#941          1         54        608        589 
+}
+```
+
+
+# Session Information
+The session information records the versions of all the packages used in the generation of the present document.
+```{r}
+sessionInfo()
+```
+
+# References{#refer}
+<span id="1">[1] Arefeen A, et al. DeepPASTA: deep neural network based polyadenylation site analysis. Bioinformatics 2019;35(22):4577–4585.</span>
+
+<span id="2">[2] Ye C, et al. QuantifyPoly(A): reshaping alternative polyadenylation landscapes of eukaryotes with weighted density peak clustering. Briefings Bioinformatics 2021;22(6)</span>
+
+<span id="3">[3] Ye W, et al. movAPA: modeling and visualization of dynamics of alternative polyadenylation across biological samples. Bioinformatics 2021;37(16):2470–2472.</span>
+
