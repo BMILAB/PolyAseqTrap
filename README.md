@@ -7,7 +7,7 @@ PolyAseqTrap is an R package designed to identify and quantify polyA sites from 
 
 * The PolyAseqTrap package consists of six main modules.
 
-<img src="https://github.com/BMILAB/PolyAseqTrap/blob/main/img/schema.png" alt="schema" style="width:60%;"/>
+<img src="https://github.com/BMILAB/PolyAseqTrap/tree/master/img/schema.png" alt="schema" style="width:60%;"/>
 
 **a**. Preprocessing and mapping of 3′ seq data across diverse techniques. 
 
