@@ -1,0 +1,15 @@
+Package: PolyAseqTrap
+Type: Package
+Title: PolyAseqTrap: a universal tool for genome-wide identification and quantification of polyadenylation sites from different 3’ end sequencing data
+Version: 0.1.0
+Author: Wenbin Ye, Xin Cheng and Xiaohui Wu
+Maintainer: Wenbin Ye <nikou123456@outlook.com>
+Description: This package provides functions for identifying and quantifying polyA sites from different 3’ seq data.
+License: GPL
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 4.0.0)
+Imports: Rsamtools, stringr, plyr, Biostrings, dplyr, GenomicRanges, IRanges, BiocGenerics, tibble, outliers, pbmcapply, limma, methods
+Suggests: movAPA, ggplot2, data.table, knitr, rmarkdown
+RoxygenNote: 7.2.3
+VignetteBuilder: knitr
