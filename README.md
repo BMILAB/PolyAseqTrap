@@ -43,7 +43,7 @@ Installation
 ```
 install.packages("devtools")
 library(devtools)
-install_github("APAexplorer/PolyAseqTrap")
+install_github("BMILAB/PolyAseqTrap")
 library(PolyAseqTrap)
 
 browseVignettes("PolyAseqTrap")
