@@ -55,7 +55,7 @@ devtools::install_local("your_path_of_PolyAseqTrap-master.zip", build_vignettes 
 Application examples
 =============
 We evaluated PolyAseqTrap against existing 3' sequencing pipelines using data from 16 different 3' sequencing techniques across multiple species. This comprehensive evaluation demonstrates the effectiveness and robustness of PolyAseqTrap. In this guide, we use demo data from three species—human, mouse, and Arabidopsis to illustrate how PolyAseqTrap can be applied for unified and user-friendly polyA site identification and analysis across different types of 3' sequencing data.
-The demo includes the following, please refer to the vignette ([PDF](https://github.com/BMILAB/PolyAseqTrap/blob/main/doc/PolyAseqTrap_tutorial.pdf), [HTML](https://bmilab.github.io/PolyAseqTrap/doc/PolyAseqTrap_tutorial.html)) for full details.
+The demo includes the following, please refer to the vignette ([PDF](https://github.com/BMILAB/PolyAseqTrap/blob/main/doc/PolyAseqTrap_tutorial.pdf), [HTML](https://bmilab.github.io/PolyAseqTrap/doc/PolyAseqTrap_tutorial.html)) for full details. **Note**: To ensure efficient distribution and maintain a lightweight structure for the PolyAseqTrap R package, the demo data previously stored in the `inst/extdata` directory has been relocated to the `refer` branch under the [demo_data](https://github.com/BMILAB/PolyAseqTrap/tree/refer/demo_data) directory. Additionally, the training data for **DeepIP**, which was previously stored in the `scripts` directory, has now been moved to the [DeepIP_train](https://github.com/BMILAB/PolyAseqTrap/tree/refer/DeepIP_train) directory in the **refer** branch.
 * **Preparations**
 * **Identify PACs at varying confidence levels from BAM file**
 
