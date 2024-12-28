@@ -1,3 +1,5 @@
+# Directory Structure Note
+
 **Note**: To optimize distribution and maintain the lightweight structure of the PolyAseqTrap R package:
 
 * [demo_data](https://github.com/BMILAB/PolyAseqTrap/tree/refer/demo_data) directory contains the demo data that was previously stored in the *`inst/extdata`* directory.
