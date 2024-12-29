@@ -100,7 +100,8 @@ head(pa.hg.result)
 * **Annotate PACs**
 * **Summary report**
   
-  - The summary report provides an overview of PACs at different levels, including their genomics region and length distributions, signal distribution, and nucleotide frequency distribution. It helps users quickly understand the predicted results by displaying the classification of PACs into categories (C1, C2, C3) and further subdividing them into subclasses (V1 to V8) based on polyA tail length, base composition, and alignment results. Additionally, chi-square values are provided to assess the similarity between identified PACs and reference sequences. <img src="https://github.com/BMILAB/PolyAseqTrap/blob/main/img/features.png" alt="features" style="width:60%;"/>
+  - The summary report provides an overview of PACs at different levels, including their genomics region and length distributions, signal distribution, and nucleotide frequency distribution. It helps users quickly understand the predicted results by displaying the classification of PACs into categories (C1, C2, C3) and further subdividing them into subclasses (V1 to V8) based on polyA tail length, base composition, and alignment results. Additionally, chi-square values are provided to assess the similarity between identified PACs and reference sequences.
+  - <img src="https://github.com/BMILAB/PolyAseqTrap/blob/main/img/features.png" alt="features" style="width:60%;"/>
   
 ```
 library(PolyAseqTrap,  warn.conflicts = FALSE, quietly=TRUE)
@@ -144,11 +145,6 @@ p<- plot_summary(data=data.PACds@anno)
 ggarrange(p$p1,p$p2,p$p3,p$p4,    labels = c("A", "B", "C","D"))
 
 ```
-
-
-The summary report provides an overview of PACs at different levels, including their genomics region and length distributions, signal distribution, and nucleotide frequency distribution. It helps users quickly understand the predicted results by displaying the classification of PACs into categories (C1, C2, C3) and further subdividing them into subclasses (V1 to V8) based on polyA tail length, base composition, and alignment results. Additionally, chi-square values are provided to assess the similarity between identified PACs and reference sequences.
-
-<img src="https://github.com/BMILAB/PolyAseqTrap/blob/main/img/features.png" alt="features" style="width:60%;"/>
 
 
 
