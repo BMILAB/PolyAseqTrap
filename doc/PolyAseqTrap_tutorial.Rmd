@@ -696,7 +696,8 @@ boxplot(statistic ,col="orange",
 )
 
 ##plot distributions of PACs across different categories, subclasses, genomic features, and polyA signals
-data.PACds@anno$coord_class <- factor(data.PACds@anno$coord_level,                            levels=c("V1","V2","V3","V4","V5","V6","V7","V8","Count"),
+data.PACds@anno$coord_class <- factor(data.PACds@anno$coord_level,                            
+          levels=c("V1","V2","V3","V4","V5","V6","V7","V8","Count"),
         labels= c("C1","C1","C2","C2","C1","C2","C2","C3","Count"))
 
 p<- plot_summary(data=data.PACds@anno)
