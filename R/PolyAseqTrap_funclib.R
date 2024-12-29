@@ -48,56 +48,51 @@ options(stringsAsFactors=F)
 #'             Default is 'T'.
 #' @return A list containing two elements about alignment results and PACs.
 #' \itemize{
-#'   \item \code{pa.table}: A \code{data.frame} with the following columns:
+#'   \item {pa.table}{A data.frame with the following columns:}
 #'     \describe{
-#'       \item{\code{\bold{readName}}}{Name of the read.}
-#'       \item{\code{\bold{flag}}}{Bitwise FLAG.}
-#'       \item{\code{\bold{cigar}}}{CIGAR string.}
-#'       \item{\code{\bold{chr}}}{The name of the chromosome.}
-#'       \item{\code{\bold{start}}}{The starting position of the feature in the chromosome.}
-#'       \item{\code{\bold{end}}}{The ending position of the feature in the chromosome.}
-#'       \item{\code{\bold{strand}}}{The strand direction of the feature in the chromosome.}
-#'       \item{\code{\bold{coord}}}{The coordinate of the potential polyA site.}
-#'       \item{\code{\bold{seq}}}{The sequence of the input trimmed read.}
-#'       \item{\code{\bold{softClipFragment}}}{The fragment of the soft-clipping.}
-#'       \item{\code{\bold{trimmed_seq}}}{The trimmed polyA tail.}
-#'       \item{\code{\bold{unmapped_seq}}}{The sequence in the original read that cannot be aligned to the reference genome.}
-#'       \item{\code{\bold{reference_seq}}}{The reference sequence around the potential polyA site.}
-#'       \item{\code{\bold{ref_match_trimmed}}}{The part of the reference sequence corresponding to \code{trimmed_seq}.}
-#'       \item{\code{\bold{ref_match_unmapped}}}{The part of the reference sequence corresponding to \code{unmapped_seq}.}
-#'       \item{\code{\bold{is_Arich}}}{Whether it is an A-rich polyA site.}
-#'       \item{\code{\bold{A_number}}}{The total number of adenines (A) within the reference sequence, spanning 10 bp upstream and downstream of the polyA site.}
-#'       \item{\code{\bold{diff_a}}}{The total number of non-genomic As at the 3’ end.}
-#'       \item{\code{\bold{level}}}{The subclass or confidence level of the aligned read.}
-#'       \item{\code{\bold{class}}}{The category of the aligned read.}
-#'       \item{\code{\bold{use.as.count}}}{Whether the read is used in the quantification of PACs.}
-#'       \item{\code{\bold{PAid}}}{The identity of PACs.}
+#'     \item{readName}{Name of the read.}
+#'       \item{flag}{Bitwise FLAG.}
+#'       \item{cigar}{CIGAR string.}
+#'       \item{chr}{The name of the chromosome.}
+#'       \item{start}{The starting position of the feature in the chromosome.}
+#'       \item{end}{The ending position of the feature in the chromosome.}
+#'       \item{strand}{The strand direction of the feature in the chromosome.}
+#'       \item{coord}{The coordinate of the potential polyA site.}
+#'       \item{seq}{The sequence of the input trimmed read.}
+#'       \item{softClipFragment}{The fragment of the soft-clipping.}
+#'       \item{trimmed_seq}{The trimmed polyA tail.}
+#'       \item{unmapped_seq}{The sequence in the original read that cannot be aligned to the reference genome.}
+#'       \item{reference_seq}{The reference sequence around the potential polyA site.}
+#'       \item{ref_match_trimmed}{The part of the reference sequence corresponding to \code{trimmed_seq}.}
+#'       \item{ref_match_unmapped}{The part of the reference sequence corresponding to \code{unmapped_seq}.}
+#'       \item{is_Arich}{Whether it is an A-rich polyA site.}
+#'       \item{A_number}{The total number of adenines (A) within the reference sequence, spanning 10 bp upstream and downstream of the polyA site.}
+#'       \item{diff_a}{The total number of non-genomic As at the 3’ end.}
+#'       \item{level}{The subclass or confidence level of the aligned read.}
+#'       \item{class}{The category of the aligned read.}
+#'       \item{use.as.count}{Whether the read is used in the quantification of PACs.}
+#'       \item{PAid}{The identity of PACs.}
 #'     }
-#'   \item \code{pa.coord}: A \code{data.frame} with the following columns:
+#'   \item{pa.coord}{A data.frame with the following columns:}
 #'     \describe{
-#'       \item{\code{\bold{seqnames}}}{The name of the chromosome of PACs.}
-#'       \item{\code{\bold{start}}}{The starting position of PACs in the chromosome.}
-#'       \item{\code{\bold{end}}}{The ending position of PACs in the chromosome.}
-#'       \item{\code{\bold{width}}}{The width of PACs.}
-#'       \item{\code{\bold{coord}}}{The representative coordinate of PACs.}
-#'       \item{\code{\bold{coord_readName}}}{The name of the read supporting the representative polyA site.}
-#'       \item{\code{\bold{coord_unmappedA}}}{The total number of non-genomic As at the 3’ end of the representative read.}
-#'       \item{\code{\bold{coord_level}}}{The confidence level of the representative polyA site.}
-#'       \item{\code{\bold{UPA_coord}}}{The coordinates of aligned reads in corresponding PACs.}
-#'       \item{\code{\bold{UPA_readName}}}{The name of aligned reads in corresponding PACs.}
-#'       \item{\code{\bold{UPA_level}}}{The confidence level label of aligned reads in corresponding PACs.}
-#'       \item{\code{\bold{PAid}}}{The identity of PACs.}
-#'       \item{\code{\bold{total.count}}}{The total counts of PACs based on all categories of aligned reads.}
-#'       \item{\code{\bold{count_with.polyA}}}{The total counts of PACs based on C1-C3 of aligned reads.}
+#'       \item{seqnames}{The name of the chromosome of PACs.}
+#'       \item{start}{The starting position of PACs in the chromosome.}
+#'       \item{end}{The ending position of PACs in the chromosome.}
+#'       \item{width}{The width of PACs.}
+#'       \item{coord}{The representative coordinate of PACs.}
+#'       \item{coord_readName}{The name of the read supporting the representative polyA site.}
+#'       \item{coord_unmappedA}{The total number of non-genomic As at the 3’ end of the representative read.}
+#'       \item{coord_level}{The confidence level of the representative polyA site.}
+#'       \item{UPA_coord}{The coordinates of aligned reads in corresponding PACs.}
+#'       \item{UPA_readName}{The name of aligned reads in corresponding PACs.}
+#'       \item{UPA_level}{The confidence level label of aligned reads in corresponding PACs.}
+#'       \item{PAid}{The identity of PACs.}
+#'       \item{total.count}{The total counts of PACs based on all categories of aligned reads.}
+#'       \item{count_with.polyA}{The total counts of PACs based on C1-C3 of aligned reads.}
 #'     }
 #' }
 #' @export
 #'
-
-
-
-
-
 FindPTA <- function(bam=NULL,yieldSize=26000000,reverse=FALSE,
                           bsgenome=NULL,d=24,poly="T",adjust.chr=FALSE,
                           threeUTRregion=NULL,
@@ -1794,6 +1789,130 @@ findTailAT<-function(infile=NULL,
 }
 
 
+
+
+
+#' Calculate a chi-square metric
+#'
+#' to assess the similarity between the single nucleotide profile of
+#' identified poly A sites and the reference profile
+#'
+#' @name cal.chisq
+#' @param fafile fasta file name, which contains upstream and downstream 100 bp sequences of PACs
+#' @param ref.data Single nucleotide frequency distribution of the reference PACs.
+#' @param  iteration The number of random sampling iterations, default is 100.
+#' @param use.size The number of PACs randomly sampled each time, default is 5000.
+#' @return Chi-Square (χ2) Statistic
+#' @export
+#'
+cal.chisq <- function(fafile=NULL,ref.data =NULL,iteration=100,use.size=5000){
+  seq=readDNAStringSet(fafile, format="fasta")
+  nseq=length(seq)
+
+  din<-consensusMatrix(seq, as.prob=TRUE, baseOnly=TRUE)
+  din<- as.data.frame(t(din))
+  din$other <- NULL
+  din$pos <- c(1:nrow(din))
+  din$number <- nseq
+
+  subset.list <- list()
+  for(i in 1:iteration){
+    index <- sample(1:nseq,size=use.size,replace = F)
+    seqsub <- seq[index]
+    dinsub<-consensusMatrix(seqsub, as.prob=TRUE, baseOnly=TRUE)
+    dinsub<- as.data.frame(t(dinsub))
+    dinsub$other <- NULL
+    dinsub$pos <- c(1:nrow(dinsub))
+    dinsub$number <- length(seqsub)
+    subset.list[[i]] <-dinsub
+  }
+
+  ref.data<- ref.data[,1:4]*ref.data$number
+  ref.input <- c(ref.data[,1],
+                 ref.data[,2],
+                 ref.data[,3],
+                 ref.data[,4])
+
+
+  chiseq.list <- list()
+  for(i in 1:iteration){
+    obj.data <-     subset.list[[i]]
+    obj.data<- obj.data[,1:4]*obj.data$number
+    obj.input <- c(obj.data[,1],
+                   obj.data[,2],
+                   obj.data[,3],
+                   obj.data[,4])
+    x <- matrix(c(as.integer(ref.input) ,
+                  as.integer(obj.input)),nrow=2,byrow=TRUE)
+    chiseq.list[["statistic"]][[i]] <- chisq.test(x)$statistic/201
+    chiseq.list[["pvalue"]][[i]] <- chisq.test(x)$p.value
+  }
+  return(chiseq.list)
+}
+
+
+
+
+
+#' A summary report function
+#'
+#' plot_summary provides an overview of PACs at different levels,
+#' including their categories, subclasses, genomics region, and signal distribution
+#'
+#' @name plot_summary
+#' @param data A data frame inclues class, subclass, genomics features and polyA signals.
+#' @return plots
+#' @export
+#'
+plot_summary<-function(data=NULL){
+  t.level <- as.data.frame(table(data$coord_level))
+  t.class <- as.data.frame(table(data$coord_class))
+  t.ftr <- as.data.frame(table(data$ftr))
+
+  t.pas<- as.data.frame(table(data$pA.signal))
+  colnames(t.level) <- c("anno","freq")
+  colnames(t.class) <- c("anno","freq")
+  colnames(t.ftr) <- c("anno","freq")
+  colnames(t.pas) <- c("anno","freq")
+  t.level$type <- "subclass"
+  t.class$type<- "class"
+  t.ftr$type <- "ftr"
+  t.pas$type <- "pas"
+
+  p1<- ggplot(subset(t.class,anno!="Count"),
+              aes(x=type,y=freq,fill=factor(anno,rev(levels(anno)))))+
+    geom_bar(stat="identity")+theme_classic()+
+    #facet_wrap(~type,nrow=1)+
+    scale_fill_manual(values=c("#950404FF","#DABD61FF","#004042FF"))+
+    labs(x=NULL,y="# of PACs")+
+    guides(fill=guide_legend(title='',ncol=1,reverse = T))
+
+  p2<- ggplot(subset(t.level,anno!="Count"),
+              aes(x=type,y=freq,fill=factor(anno,rev(levels(anno)))))+
+    geom_bar(stat="identity")+theme_classic()+
+    scale_fill_manual(values=rev( c("#004042FF","#EBCC2A",
+                                    "#46ACC8","#C6CDF7","#B40F20", "#D8A499",
+                                    "#D67236","#798E87")))+
+    labs(x=NULL,y="# of PACs")+
+    guides(fill=guide_legend(title='',ncol=1,reverse = T))
+
+  p3<- ggplot(t.ftr,
+              aes(x=type,y=freq,fill=factor(anno,rev(levels(anno)))))+
+    geom_bar(stat="identity")+theme_classic()+
+    scale_fill_manual(values=c("#02401B" ,"#A2A475", "#81A88D" ,"#D8B70A","#972D15"))+
+    labs(x=NULL,y="# of PACs")+
+    guides(fill=guide_legend(title='',ncol=1,reverse = T))
+
+
+
+  p4<- ggplot(t.pas,
+              aes(x=type,y=freq,fill=factor(anno,rev(levels(anno)))))+
+    geom_bar(stat="identity")+theme_classic()+
+    scale_fill_manual(values=rev(c("#F2AD00","#ECCBAE","#D6D6D6")))+
+    labs(x=NULL,y="# of PACs")+
+    guides(fill=guide_legend(title='',ncol=1,reverse = T))
+  return(list(p1=p1,p2=p2,p3=p3,p4=p4))
+}
 
 
 
