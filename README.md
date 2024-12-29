@@ -105,16 +105,19 @@ library(ggplot2)
 library("BSgenome.Hsapiens.UCSC.hg38", quietly = TRUE)
 library(movAPA, warn.conflicts = FALSE, quietly=TRUE)
 library(ggpubr)
-library(ggpubr)
 bsgenome <-BSgenome.Hsapiens.UCSC.hg38
 data(data.PACds)
 faFiles=faFromPACds(data.PACds, bsgenome, what='updn', fapre='updn', 
                     up=-100, dn=100,byGrp='ftr')
 
-##plot single nucleotide profiles for 3'UTR PACs
+## plot single nucleotide profiles for 3'UTR PACs
 plotATCGforFAfile("updn.3UTR.fa", ofreq=FALSE, opdf=FALSE, 
                   refPos=101, mergePlots = TRUE)
 
+
+## calculate a chi-square metric to assess the similarity between the single nucleotide profile of identified polyA sites and the reference profile
+# load reference PACs profile
+data(ref.data)
 
 #This demonstrates functionality with 10 iterations and 200 random PACs. Larger parameters are recommended (e.g., iteration = 100, use.size = 5000)
 chisq.result <- cal.chisq(fafile="updn.3UTR.fa",ref.data=ref.data,
@@ -129,7 +132,7 @@ boxplot(statistic ,col="orange",
         border = "brown"
 )
 
-##plot distributions of PACs across different categories, subclasses, genomic features, and polyA signals
+## plot distributions of PACs across different categories, subclasses, genomic features, and polyA signals
 data.PACds@anno$coord_class <- factor(data.PACds@anno$coord_level,                            
           levels=c("V1","V2","V3","V4","V5","V6","V7","V8","Count"),
         labels= c("C1","C1","C2","C2","C1","C2","C2","C3","Count"))
@@ -138,11 +141,7 @@ p<- plot_summary(data=data.PACds@anno)
 ggarrange(p$p1,p$p2,p$p3,p$p4,    labels = c("A", "B", "C","D"))
 
 ```
-
-```
-## You can also browse the vignette using the following command on the R console
-vignette("PolyAseqTrap_tutorial", package = "PolyAseqTrap")
-```
+<img src="https://github.com/BMILAB/PolyAseqTrap/blob/master/img/schema.png" alt="schema" style="width:60%;"/>
 
 
 Citation
