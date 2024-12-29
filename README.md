@@ -141,7 +141,7 @@ p<- plot_summary(data=data.PACds@anno)
 ggarrange(p$p1,p$p2,p$p3,p$p4,    labels = c("A", "B", "C","D"))
 
 ```
-<img src="https://github.com/BMILAB/PolyAseqTrap/blob/master/img/schema.png" alt="schema" style="width:60%;"/>
+<img src="https://github.com/BMILAB/PolyAseqTrap/blob/main/img/features.png" alt="features" style="width:60%;"/>
 
 
 Citation
