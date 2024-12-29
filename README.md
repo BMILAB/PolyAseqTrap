@@ -58,8 +58,8 @@ We evaluated PolyAseqTrap against existing 3' sequencing pipelines using data fr
 The demo includes the following, please refer to the vignette ([PDF](https://github.com/BMILAB/PolyAseqTrap/blob/main/doc/PolyAseqTrap_tutorial.pdf), [HTML](https://bmilab.github.io/PolyAseqTrap/doc/PolyAseqTrap_tutorial.html)) for full details. 
 
 **Note**: To ensure efficient distribution and maintain a lightweight structure for the PolyAseqTrap R package, the demo data previously stored in the *`inst/extdata`* directory has been relocated to the [refer branch](https://github.com/BMILAB/PolyAseqTrap/tree/refer) under the [demo_data](https://github.com/BMILAB/PolyAseqTrap/tree/refer/demo_data) directory. Additionally, the training data for **DeepIP**, which was previously stored in the *`scripts`* directory, has now been moved to the [DeepIP_train](https://github.com/BMILAB/PolyAseqTrap/tree/refer/DeepIP_train) directory in the [refer branch](https://github.com/BMILAB/PolyAseqTrap/tree/refer).
-* **Preparations**
-* **Identify PACs at varying confidence levels from BAM file**
+* **Preparations**: Preprocessing steps are crucial to ensuring data accuracy and quality prior to downstream analysis with `PolyAseqTrap`.
+* **Identify PACs at varying confidence levels from BAM file**：`PolyAseqTrap` employs a priority model to classify aligned reads into three categories and nine subclasses according to the presence and composition of the polyA tail.
 
 ```
 library(PolyAseqTrap,  warn.conflicts = FALSE, quietly=TRUE)
@@ -95,10 +95,10 @@ head(pa.hg.result)
 ```
 
 
-* **Remove internal priming artifacts**
-* **Mitigating Microheterogeneity in PACs**
-* **Annotate PACs**
-* **Summary report**: The summary report provides an overview of PACs at different levels, including their genomics region and length distributions, signal distribution, and nucleotide frequency distribution. It helps users quickly understand the predicted results by displaying the classification of PACs into categories (C1, C2, C3) and further subdividing them into subclasses (V1 to V8) based on polyA tail length, base composition, and alignment results. Additionally, chi-square values are provided to assess the similarity between identified PACs and reference sequences.
+* **Remove internal priming artifacts**: `PolyAseqTrap` integrates a deep learning-based model, `DeepIP`, to accurately identify whether A-rich PACs are internal priming artifacts.
+* **Mitigating Microheterogeneity in PACs**: `PolyAseqTrap` integrates a density peak clustering algorithm to mitigate microheterogeneity and improve PAC identification accuracy. 
+* **Annotate PACs**: `PolyAseqTrap` utilizes the [movAPA](https://github.com/BMILAB/movAPA) R package tto comprehensively annotate PACs, including their statistical distribution, genomic features, and polyA signals. 
+* **Summary report**: The summary report overviews PACs at different levels, including their genomics region and length distributions, signal distribution, and nucleotide frequency distribution. It helps users quickly understand the predicted results by displaying the classification of PACs into categories (C1, C2, C3) and further subdividing them into subclasses (V1 to V8) based on polyA tail length, base composition, and alignment results. Additionally, chi-square values are provided to assess the similarity between identified PACs and reference sequences.
 
 <img src="https://github.com/BMILAB/PolyAseqTrap/blob/main/img/features.png" alt="features" style="width:60%;"/>
   
