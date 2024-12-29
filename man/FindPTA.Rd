@@ -58,47 +58,47 @@ Default is FALSE.}
 \value{
 A list containing two elements about alignment results and PACs.
 \itemize{
-  \item \code{pa.table}: A \code{data.frame} with the following columns:
+  \item {pa.table}{A data.frame with the following columns:}
     \describe{
-      \item{\code{\bold{readName}}}{Name of the read.}
-      \item{\code{\bold{flag}}}{Bitwise FLAG.}
-      \item{\code{\bold{cigar}}}{CIGAR string.}
-      \item{\code{\bold{chr}}}{The name of the chromosome.}
-      \item{\code{\bold{start}}}{The starting position of the feature in the chromosome.}
-      \item{\code{\bold{end}}}{The ending position of the feature in the chromosome.}
-      \item{\code{\bold{strand}}}{The strand direction of the feature in the chromosome.}
-      \item{\code{\bold{coord}}}{The coordinate of the potential polyA site.}
-      \item{\code{\bold{seq}}}{The sequence of the input trimmed read.}
-      \item{\code{\bold{softClipFragment}}}{The fragment of the soft-clipping.}
-      \item{\code{\bold{trimmed_seq}}}{The trimmed polyA tail.}
-      \item{\code{\bold{unmapped_seq}}}{The sequence in the original read that cannot be aligned to the reference genome.}
-      \item{\code{\bold{reference_seq}}}{The reference sequence around the potential polyA site.}
-      \item{\code{\bold{ref_match_trimmed}}}{The part of the reference sequence corresponding to \code{trimmed_seq}.}
-      \item{\code{\bold{ref_match_unmapped}}}{The part of the reference sequence corresponding to \code{unmapped_seq}.}
-      \item{\code{\bold{is_Arich}}}{Whether it is an A-rich polyA site.}
-      \item{\code{\bold{A_number}}}{The total number of adenines (A) within the reference sequence, spanning 10 bp upstream and downstream of the polyA site.}
-      \item{\code{\bold{diff_a}}}{The total number of non-genomic As at the 3’ end.}
-      \item{\code{\bold{level}}}{The subclass or confidence level of the aligned read.}
-      \item{\code{\bold{class}}}{The category of the aligned read.}
-      \item{\code{\bold{use.as.count}}}{Whether the read is used in the quantification of PACs.}
-      \item{\code{\bold{PAid}}}{The identity of PACs.}
+    \item{readName}{Name of the read.}
+      \item{flag}{Bitwise FLAG.}
+      \item{cigar}{CIGAR string.}
+      \item{chr}{The name of the chromosome.}
+      \item{start}{The starting position of the feature in the chromosome.}
+      \item{end}{The ending position of the feature in the chromosome.}
+      \item{strand}{The strand direction of the feature in the chromosome.}
+      \item{coord}{The coordinate of the potential polyA site.}
+      \item{seq}{The sequence of the input trimmed read.}
+      \item{softClipFragment}{The fragment of the soft-clipping.}
+      \item{trimmed_seq}{The trimmed polyA tail.}
+      \item{unmapped_seq}{The sequence in the original read that cannot be aligned to the reference genome.}
+      \item{reference_seq}{The reference sequence around the potential polyA site.}
+      \item{ref_match_trimmed}{The part of the reference sequence corresponding to \code{trimmed_seq}.}
+      \item{ref_match_unmapped}{The part of the reference sequence corresponding to \code{unmapped_seq}.}
+      \item{is_Arich}{Whether it is an A-rich polyA site.}
+      \item{A_number}{The total number of adenines (A) within the reference sequence, spanning 10 bp upstream and downstream of the polyA site.}
+      \item{diff_a}{The total number of non-genomic As at the 3’ end.}
+      \item{level}{The subclass or confidence level of the aligned read.}
+      \item{class}{The category of the aligned read.}
+      \item{use.as.count}{Whether the read is used in the quantification of PACs.}
+      \item{PAid}{The identity of PACs.}
     }
-  \item \code{pa.coord}: A \code{data.frame} with the following columns:
+  \item{pa.coord}{A data.frame with the following columns:}
     \describe{
-      \item{\code{\bold{seqnames}}}{The name of the chromosome of PACs.}
-      \item{\code{\bold{start}}}{The starting position of PACs in the chromosome.}
-      \item{\code{\bold{end}}}{The ending position of PACs in the chromosome.}
-      \item{\code{\bold{width}}}{The width of PACs.}
-      \item{\code{\bold{coord}}}{The representative coordinate of PACs.}
-      \item{\code{\bold{coord_readName}}}{The name of the read supporting the representative polyA site.}
-      \item{\code{\bold{coord_unmappedA}}}{The total number of non-genomic As at the 3’ end of the representative read.}
-      \item{\code{\bold{coord_level}}}{The confidence level of the representative polyA site.}
-      \item{\code{\bold{UPA_coord}}}{The coordinates of aligned reads in corresponding PACs.}
-      \item{\code{\bold{UPA_readName}}}{The name of aligned reads in corresponding PACs.}
-      \item{\code{\bold{UPA_level}}}{The confidence level label of aligned reads in corresponding PACs.}
-      \item{\code{\bold{PAid}}}{The identity of PACs.}
-      \item{\code{\bold{total.count}}}{The total counts of PACs based on all categories of aligned reads.}
-      \item{\code{\bold{count_with.polyA}}}{The total counts of PACs based on C1-C3 of aligned reads.}
+      \item{seqnames}{The name of the chromosome of PACs.}
+      \item{start}{The starting position of PACs in the chromosome.}
+      \item{end}{The ending position of PACs in the chromosome.}
+      \item{width}{The width of PACs.}
+      \item{coord}{The representative coordinate of PACs.}
+      \item{coord_readName}{The name of the read supporting the representative polyA site.}
+      \item{coord_unmappedA}{The total number of non-genomic As at the 3’ end of the representative read.}
+      \item{coord_level}{The confidence level of the representative polyA site.}
+      \item{UPA_coord}{The coordinates of aligned reads in corresponding PACs.}
+      \item{UPA_readName}{The name of aligned reads in corresponding PACs.}
+      \item{UPA_level}{The confidence level label of aligned reads in corresponding PACs.}
+      \item{PAid}{The identity of PACs.}
+      \item{total.count}{The total counts of PACs based on all categories of aligned reads.}
+      \item{count_with.polyA}{The total counts of PACs based on C1-C3 of aligned reads.}
     }
 }
 }
