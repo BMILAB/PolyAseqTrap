@@ -98,6 +98,7 @@ head(pa.hg.result)
 * **Remove internal priming artifacts**
 * **Mitigating Microheterogeneity in PACs**
 * **Annotate PACs**
+* **Summary report**
 
 ```
 ## You can also browse the vignette using the following command on the R console
